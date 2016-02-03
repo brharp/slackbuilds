@@ -1,0 +1,58 @@
+#!/bin/sh
+
+set -e
+
+MODNAM=ctools
+PKGNAM=drupal-${MODNAM}
+VERSION=${VERSION:-7.x-1.9}
+BUILD=${BUILD:-1mbh}
+
+# Automatically determine the architecture we're building on:
+if [ -z "$ARCH" ]; then
+  case "$( uname -m )" in
+    i?86) export ARCH=i486 ;;
+    arm*) export ARCH=arm ;;
+    # Unless $ARCH is already set, use uname -m for all other archs:
+       *) export ARCH=$( uname -m ) ;;
+  esac
+fi
+
+CWD=$(pwd)
+if [ "$TMP" = "" ]; then
+  TMP=/tmp
+fi
+PKG=$TMP/package-${PKGNAM}
+rm -rf $PKG
+mkdir -p $PKG
+
+
+cd $TMP
+rm -rf ${PKGNAM}-${VERSION}
+tar xzf $CWD/${MODNAM}-${VERSION}.tar.gz
+cd ${MODNAM}
+
+
+# Make sure ownerships and permissions are sane:
+chown -R root:root .
+find . -perm 666 -exec chmod 644 {} \;
+find . -perm 664 -exec chmod 644 {} \;
+find . -perm 600 -exec chmod 644 {} \;
+find . -perm 444 -exec chmod 644 {} \;
+find . -perm 400 -exec chmod 644 {} \;
+find . -perm 440 -exec chmod 644 {} \;
+find . -perm 777 -exec chmod 755 {} \;
+find . -perm 775 -exec chmod 755 {} \;
+find . -perm 511 -exec chmod 755 {} \;
+find . -perm 711 -exec chmod 755 {} \;
+find . -perm 555 -exec chmod 755 {} \;
+
+# Build and install:
+DRUPALDIR=usr/share/drupal7
+MODULEDIR=${DRUPALDIR}/sites/all/modules/${MODNAM}
+mkdir -p $PKG/$MODULEDIR
+cp -r * $PKG/$MODULEDIR
+
+
+cd $PKG
+makepkg -l y -c n ../${PKGNAM}-$VERSION-$ARCH-$BUILD.tgz
+
