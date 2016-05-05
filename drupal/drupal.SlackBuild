@@ -3,7 +3,7 @@
 set -e
 
 PKGNAM=drupal
-VERSION=${VERSION:-7.41}
+VERSION=${VERSION:-7.43}
 BUILD=${BUILD:-1mbh}
 
 # Automatically determine the architecture we're building on:
@@ -12,7 +12,7 @@ if [ -z "$ARCH" ]; then
     i?86) export ARCH=i486 ;;
     arm*) export ARCH=arm ;;
     # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
+    *) export ARCH=$( uname -m ) ;;
   esac
 fi
 
@@ -46,17 +46,17 @@ find . -perm 555 -exec chmod 755 {} \;
 # Build and install:
 DRUPALDIR=usr/share/drupal7
 mkdir -p $PKG/$DRUPALDIR
-cp -r * $PKG/$DRUPALDIR
+cp -r .htaccess .gitignore * $PKG/$DRUPALDIR
 
 # Fix misplaced items:
-mkdir $PKG/etc
-mv $PKG/$DRUPALDIR/sites/default $PKG/etc/drupal
-ln -s /etc/drupal $PKG/$DRUPALDIR/sites/default
+mkdir -p $PKG/etc/drupal
+mv $PKG/$DRUPALDIR/sites $PKG/etc/drupal
+ln -s /etc/drupal/sites $PKG/$DRUPALDIR/sites
 mkdir -p $PKG/var/lib/drupal7
 ( cd $PKG/var/lib/drupal7
-  mkdir -p files/public
-  chown -R apache:apache files
-  ln -s /var/lib/drupal7/files/public $PKG/etc/drupal/files
+  mkdir files private tmp
+  chown -R apache:apache files private tmp
+  ln -s /var/lib/drupal7/files $PKG/etc/drupal/sites/default/files
 )
 
 
@@ -64,5 +64,5 @@ mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
 cd $PKG
-makepkg -l y -c n ../${PKGNAM}-$VERSION-$ARCH-$BUILD.tgz
+/sbin/makepkg -l y -c n ../${PKGNAM}-$VERSION-$ARCH-$BUILD.tgz
 
