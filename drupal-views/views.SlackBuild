@@ -4,7 +4,7 @@ set -e
 
 MODNAM=views
 PKGNAM=drupal-${MODNAM}
-VERSION=${VERSION:-7.x-3.11}
+VERSION=${VERSION:-7.x-3.13}
 BUILD=${BUILD:-1mbh}
 
 # Automatically determine the architecture we're building on:
@@ -13,7 +13,7 @@ if [ -z "$ARCH" ]; then
     i?86) export ARCH=i486 ;;
     arm*) export ARCH=arm ;;
     # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
+    *) export ARCH=$( uname -m ) ;;
   esac
 fi
 
@@ -48,7 +48,7 @@ find . -perm 555 -exec chmod 755 {} \;
 
 # Build and install:
 DRUPALDIR=usr/share/drupal7
-MODULEDIR=${DRUPALDIR}/sites/all/modules/${MODNAM}
+MODULEDIR=${DRUPALDIR}/modules/${MODNAM}
 mkdir -p $PKG/$MODULEDIR
 cp -r * $PKG/$MODULEDIR
 
