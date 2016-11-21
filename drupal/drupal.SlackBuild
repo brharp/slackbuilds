@@ -3,7 +3,7 @@
 set -e
 
 PKGNAM=drupal
-VERSION=${VERSION:-7.43}
+VERSION=${VERSION:-7.52}
 BUILD=${BUILD:-1mbh}
 
 # Automatically determine the architecture we're building on:
@@ -14,6 +14,10 @@ if [ -z "$ARCH" ]; then
     # Unless $ARCH is already set, use uname -m for all other archs:
     *) export ARCH=$( uname -m ) ;;
   esac
+fi
+
+if [ ! -f $PKGNAM-$VERSION.tar.gz ]; then
+  wget https://ftp.drupal.org/files/projects/$PKGNAM-$VERSION.tar.gz
 fi
 
 CWD=$(pwd)
@@ -28,9 +32,6 @@ cd $TMP
 rm -rf ${PKGNAM}-${VERSION}
 tar xzf $CWD/${PKGNAM}-$VERSION.tar.gz
 cd ${PKGNAM}-$VERSION
-
-# Remove php filter
-rm -rf modules/php
 
 # Make sure ownerships and permissions are sane:
 chown -R root:root .
@@ -47,21 +48,28 @@ find . -perm 711 -exec chmod 755 {} \;
 find . -perm 555 -exec chmod 755 {} \;
 
 # Build and install:
-DRUPALDIR=usr/share/drupal7
-mkdir -p $PKG/$DRUPALDIR
-cp -r .htaccess .gitignore * $PKG/$DRUPALDIR
-
-# Fix misplaced items:
 mkdir -p $PKG/etc/drupal
-mv $PKG/$DRUPALDIR/sites $PKG/etc/drupal
-ln -s /etc/drupal/sites $PKG/$DRUPALDIR/sites
-mkdir -p $PKG/var/lib/drupal7
-( cd $PKG/var/lib/drupal7
+mkdir -p $PKG/usr/share/drupal
+mkdir -p $PKG/var/lib/drupal
+
+mkdir -p $PKG/usr/share/drupal/core
+cp -R .htaccess *.php robots.txt includes misc modules \
+  profiles scripts themes $PKG/usr/share/drupal/core
+cp -R sites/all/* $PKG/usr/share/drupal
+
+mkdir -p $PKG/etc/drupal/sites
+cp -R sites/default $PKG/etc/drupal/sites
+ln -s /usr/share/drupal $PKG/etc/drupal/sites/all 
+ln -s /etc/drupal/sites $PKG/usr/share/drupal/core
+
+( cd $PKG/var/lib/$PKGNAM
   mkdir files private tmp
   chown -R apache:apache files private tmp
-  ln -s /var/lib/drupal7/files $PKG/etc/drupal/sites/default/files
+  ln -s /var/lib/$PKGNAM/files $PKG/etc/$PKGNAM/sites/default/files
 )
 
+mkdir -p $PKG/usr/share/doc/drupal
+cp -R [A-Z]*.txt $PKG/usr/share/doc/drupal
 
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
