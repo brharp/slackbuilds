@@ -71,6 +71,10 @@ ln -s /etc/drupal/sites $PKG/usr/share/drupal/core
 mkdir -p $PKG/usr/share/doc/drupal
 cp -R [A-Z]*.txt $PKG/usr/share/doc/drupal
 
+# Copy httpd conf
+mkdir -p $PKG/etc/httpd/extra
+cp $CWD/httpd-drupal.conf $PKG/etc/httpd/extra
+
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
