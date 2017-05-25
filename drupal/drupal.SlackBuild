@@ -3,7 +3,7 @@
 set -e
 
 PKGNAM=drupal
-VERSION=${VERSION:-7.52}
+VERSION=${VERSION:-7.54}
 BUILD=${BUILD:-1mbh}
 
 # Automatically determine the architecture we're building on:
